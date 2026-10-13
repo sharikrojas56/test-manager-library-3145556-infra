@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 16 database - starts empty (no tables)
+  postgres:
+    image: postgres:16-alpine
+    container_name: manager-library-postgres
+    environment:
+      POSTGRES_USER: manager_library
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secretpassword}
+      POSTGRES_DB: manager_library
+      POSTGRES_INITDB_ARGS: '--encoding=UTF-8 --lc-collate=C --lc-ctype=C'
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # NO init scripts - schema is owned by application migrations (ADR-001)
+    networks:
+      - manager-library-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U manager_library"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # pgAdmin for database management (optional, development only)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: manager-library-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@library.local
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - manager-library-network
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  manager-library-network:
+    driver: bridge
