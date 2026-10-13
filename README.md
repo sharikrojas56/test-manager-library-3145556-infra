@@ -5,46 +5,136 @@
 
 Este repositorio es la **infraestructura** de *Manager Library*: contenedores, red, volúmenes y el motor de base de datos vacío. **Empieza vacío a propósito**: se construye en el fork de cada aprendiz.
 
-## Instrucciones
+## 📋 Instrucciones Rápidas
 
-Cada aprendiz debe **crear el fork** de los seis repositorios del proyecto y **resolver el proyecto
-con el spec planteado**.
+### Para empezar
 
-1. Hacer fork, a su cuenta de GitHub, de cada repositorio de la tabla del final.
-2. Leer el spec en [`test-manager-library-3145556-docs`](https://github.com/code-sena/test-manager-library-3145556-docs).
-   Se entrega en dos versiones: `spec-python/` y `spec-.net/`.
-3. Desarrollar en los forks.
+1. **Clona tu fork** de este repositorio
+2. **Configura el entorno**:
+   ```bash
+   make init-env    # Crea .env desde .env.example
+   # Edita .env con tus valores si es necesario
+   ```
+3. **Levanta los servicios**:
+   ```bash
+   make dev        # O: docker-compose up -d
+   ```
+4. **Verifica que todo funcione**:
+   ```bash
+   make ps         # Ver estado de servicios
+   make health     # Ver salud de servicios
+   ```
 
-## El reto se desarrolla con React y PHP (Laravel)
+### Comandos Principales (Makefile)
 
-El spec está escrito para Python y para .NET, pero el reto **no** se hace en esos lenguajes:
+| Comando | Descripción |
+|---------|-------------|
+| `make dev` | Inicia entorno de desarrollo |
+| `make down` | Detiene todos los servicios |
+| `make restart` | Reinicia servicios |
+| `make logs` | Muestra logs en tiempo real |
+| `make clean` | **PELIGROSO**: Detiene servicios y borra TODOS los datos |
+| `make shell-pg` | Abre shell de PostgreSQL |
+| `make shell-pgadmin` | Muestra URL de pgAdmin |
+| `make status` | Muestra estado de servicios |
+| `make info` | Muestra información de conexión |
 
-| Capa | Tecnología del reto |
-|---|---|
-| Frontend | React |
-| Backend | PHP con Laravel |
+## 🐳 Servicios Disponibles
 
-Lo que el spec define sobre el negocio —historias, criterios de aceptación, reglas, contrato de la
-API, modelo de datos— se respeta. Lo que define sobre la tecnología se traduce a React y Laravel.
+### 1. PostgreSQL 16 (Motor Vacío)
+- **Puerto:** `5432`
+- **Base de datos:** `manager_library`
+- **Usuario:** `manager_library`
+- **Contraseña:** Configurada en `.env`
+- **Volumen:** Persistente en `postgres_data`
 
-## La prueba no consiste en escribir el código
+**Importante:** Este motor comienza **VACÍO** (sin tablas). Las tablas se crean mediante migraciones de la aplicación (ver ADR-001).
 
-El propósito principal es ver la **capacidad de desempeño con SDD** (*Spec-Driven Development*,
-desarrollo guiado por especificación): cómo se lee, se interpreta y se aplica una especificación
-para llevarla a un stack distinto. El código es el medio, no el fin.
+### 2. pgAdmin 4 (Opcional - Solo Desarrollo)
+- **URL:** http://localhost:5050
+- **Email:** `admin@library.local`
+- **Contraseña:** Configurada en `.env`
 
-## Entrega
+## 🔒 Seguridad y Variables de Entorno
 
-Cuenta lo que quede **subido a los forks antes de las 5:00 p. m.** (17:00). Lo que llegue después no se revisa.
-No hay prórroga: suban avances parciales con commits pequeños durante la prueba.
+### Archivos importantes:
+- `.env.example` → **VERSIONADO**: Plantilla con variables
+- `.env` → **NO VERSIONADO**: Variables reales (agregado a .gitignore)
+- `.gitignore` → Excluye `.env` y archivos sensibles
 
-## Los seis repositorios
+### Para configurar:
+```bash
+# 1. Copiar plantilla
+cp .env.example .env
 
-| Repositorio | Qué va ahí |
-|---|---|
-| [`test-manager-library-3145556-docs`](https://github.com/code-sena/test-manager-library-3145556-docs) | El spec: `spec-python/` y `spec-.net/` |
-| [`test-manager-library-3145556-api`](https://github.com/code-sena/test-manager-library-3145556-api) | Backend en PHP (Laravel) |
-| [`test-manager-library-3145556-app`](https://github.com/code-sena/test-manager-library-3145556-app) | Frontend en React |
-| [`test-manager-library-3145556-page`](https://github.com/code-sena/test-manager-library-3145556-page) | Sitio público estático de presentación |
-| [`test-manager-library-3145556-infra`](https://github.com/code-sena/test-manager-library-3145556-infra) | Contenedores, red, volúmenes y motor de base de datos vacío |
-| [`test-manager-library-3145556-tool`](https://github.com/code-sena/test-manager-library-3145556-tool) | Utilidades: sembrador de datos de demostración |
+# 2. Editar .env con tus valores
+# (No subir .env al repositorio!)
+```
+
+## 📁 Estructura del Proyecto
+
+```
+test-manager-library-3145556-infra/
+├── docker-compose.yml    # Configuración de servicios Docker
+├── .env.example          # Plantilla de variables de entorno
+├── .gitignore           # Excluye archivos sensibles
+├── Makefile             # Comandos de desarrollo
+└── README.md            # Esta documentación
+```
+
+## 🎯 Principios de Diseño (Infra)
+
+1. **Motor Vacío:** PostgreSQL comienza sin tablas
+2. **Sin DDL:** No hay scripts `CREATE TABLE` en este repositorio (ADR-001)
+3. **Persistencia:** Volúmenes Docker para datos persistentes
+4. **Desarrollo:** Herramientas opcionales (pgAdmin) solo para desarrollo
+
+## 🔗 Repositorios Relacionados
+
+| Repositorio | Tecnología | Propósito |
+|-------------|------------|-----------|
+| [`test-manager-library-3145556-api`](https://github.com/code-sena/test-manager-library-3145556-api) | PHP/Laravel | Backend con migraciones |
+| [`test-manager-library-3145556-app`](https://github.com/code-sena/test-manager-library-3145556-app) | React | Frontend |
+| [`test-manager-library-3145556-docs`](https://github.com/code-sena/test-manager-library-3145556-docs) | Markdown | Especificación completa |
+| [`test-manager-library-3145556-page`](https://github.com/code-sena/test-manager-library-3145556-page) | HTML/CSS | Sitio público |
+| [`test-manager-library-3145556-tool`](https://github.com/code-sena/test-manager-library-3145556-tool) | (Tool) | Sembrador de datos |
+
+## 📚 Especificación
+
+**Leer la especificación completa en:** `test-manager-library-3145556-docs`
+
+- **Spec PHP:** `spec-php/` (versión para Laravel)
+- **API Contract:** Endpoints HTTP y convenciones
+- **Data Model:** Modelo de datos completo
+- **Architecture:** Arquitectura hexagonal
+- **ADR:** Decisiones arquitectónicas
+
+## ⚠️ Notas Importantes
+
+1. **Entrega:** Todo debe estar subido antes de las 5:00 p.m. (17:00)
+2. **Commits:** Subir avances parciales con commits pequeños
+3. **Especificación:** Respetar el spec en docs (historias, criterios, modelo de datos)
+4. **Stack:** React (frontend) + PHP/Laravel (backend)
+5. **Propósito:** Demostrar capacidad con SDD (Spec-Driven Development)
+
+## 🆘 Solución de Problemas
+
+### Puerto en uso
+```bash
+make check-ports  # Verifica puertos ocupados
+```
+
+### Reset completo (borra todos los datos)
+```bash
+make reset  # Detiene, borra volúmenes y reinicia
+```
+
+### Ver logs específicos
+```bash
+make logs-postgres   # Logs de PostgreSQL
+make logs-pgadmin    # Logs de pgAdmin
+```
+
+---
+
+> **Recordatorio:** Este repositorio solo contiene infraestructura. La aplicación (migraciones, código) va en los otros repositorios.
